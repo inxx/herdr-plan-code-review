@@ -43,6 +43,7 @@ ensure_reviewers() {
   if agent_exists rev-cc || agent_exists rev-cx; then return 0; fi
   tab=$("$HB" tab create --cwd "$repo" --label review --no-focus \
     | python3 -c 'import sys,json;print(json.load(sys.stdin)["result"]["tab"]["tab_id"])') || return 1
-  "$HB" agent start rev-cc --tab "$tab" --no-focus              -- claude --model "$REVIEW_MODEL"
-  "$HB" agent start rev-cx --tab "$tab" --split down --no-focus -- codex
+  # --tab은 탭 cwd를 상속하지 않으므로 --cwd를 명시해야 리뷰어가 repo에서 뜬다.
+  "$HB" agent start rev-cc --cwd "$repo" --tab "$tab" --no-focus              -- claude --model "$REVIEW_MODEL"
+  "$HB" agent start rev-cx --cwd "$repo" --tab "$tab" --split down --no-focus -- codex
 }
