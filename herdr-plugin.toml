@@ -1,0 +1,12 @@
+id = "plan-code-review"
+name = "Plan → Code → Review"
+version = "0.1.0"
+min_herdr_version = "0.7.0"
+description = "Opus가 계획, Sonnet이 코딩, Claude+Codex가 리뷰 — 액션 하나로 에이전트 판 4개를 연다."
+platforms = ["linux", "macos"]
+
+[[actions]]
+id = "layout"
+title = "Plan → Code → Review layout"
+contexts = ["workspace", "tab"]
+command = ["bash", "actions/layout.sh"]
