@@ -87,5 +87,5 @@ Pane placement, models, the review prompt, and plan mode all live in
 `actions/lib.sh` and `actions/*.sh`. The auto-handoff gate is in
 `events/on-status.sh`.
 
-> The screenshot above is a mockup — a real capture would embed a working
-> repo's source, so a synthetic layout is used instead.
+> The screenshot is a real herdr capture; project names and paths have been
+> replaced with mock data.
