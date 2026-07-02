@@ -10,3 +10,13 @@ id = "layout"
 title = "Plan → Code → Review layout"
 contexts = ["workspace", "tab"]
 command = ["bash", "actions/layout.sh"]
+
+[[actions]]
+id = "review"
+title = "현재 diff를 리뷰어에게 핸드오프"
+contexts = ["workspace", "tab"]
+command = ["bash", "actions/review.sh"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["bash", "events/on-status.sh"]
