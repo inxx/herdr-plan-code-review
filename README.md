@@ -42,13 +42,24 @@ herdr plugin link ./herdr-plan-code-review
   **types** the review prompt into both panes. `agent send` does not press
   Enter, so you eyeball the diff and hit Enter yourself (a safety checkpoint).
   - CLI: `herdr plugin action invoke plan-code-review.review`
+- **`collect`** — reads both reviewers' recent output (`herdr agent read`) and
+  writes them to one file so you merge from a single place instead of scrolling
+  two panes. Waits for each reviewer to be `idle` first (best-effort) so it
+  doesn't capture a half-streamed review.
+  - CLI: `herdr plugin action invoke plan-code-review.collect`
+  - Output: `$HERDR_PLUGIN_STATE_DIR/reviews.md` (the state dir herdr sets when
+    it runs the action; falls back to `/tmp/reviews.md` if run by hand). Line
+    count via `PCR_COLLECT_LINES`, default 400.
+  - `done` looks like the state to wait on, but herdr rejects it for CLI waits
+    ("done is a UI attention state; use idle") — so `collect` waits on `idle`.
 
 ## Workflow
 
 1. In `planner`, produce a plan and save it to `plan.md` (plan mode never edits files).
 2. In `coder` (`herdr agent attach coder`): "read plan.md, implement it, then `git add -A`".
 3. Run the `review` action → the prompt is typed into `rev-cc` / `rev-cx` → hit Enter in each.
-4. In any pane, merge both reviews: dedupe and sort by severity.
+4. When both reviewers finish, run the `collect` action → both reviews land in
+   one `reviews.md` → merge from there: dedupe and sort by severity.
 
 herdr highlights whichever pane is `blocked` in the tab bar, so you attach to
 the one that needs you instead of polling four terminals.
