@@ -11,19 +11,19 @@ ROOT="${HERDR_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 [ -f "${HERDR_PLUGIN_CONFIG_DIR:-/nonexistent}/autohandoff.on" ] || exit 0
 
 CTX="${HERDR_PLUGIN_CONTEXT_JSON:-}"; [ -n "$CTX" ] || exit 0
-pid=$(printf '%s' "$CTX" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("data",{}).get("pane_id") or "")' 2>/dev/null)
-st=$(printf  '%s' "$CTX" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("data",{}).get("agent_status") or "")' 2>/dev/null)
+pid=$(printf '%s' "$CTX" | jq -r '.data.pane_id // ""' 2>/dev/null)
+st=$(printf  '%s' "$CTX" | jq -r '.data.agent_status // ""' 2>/dev/null)
 [ "$st" = "idle" ] || exit 0
 [ "$(name_of_pane "$pid")" = "coder" ] || exit 0   # coder가 idle 됐을 때만
 
 REPO="$(resolve_repo)"
 # 변경 지문(tracked diff + working state). HEAD 없거나 repo 아니면 빈 값 → skip.
-h=$( { git -C "$REPO" diff HEAD 2>/dev/null; git -C "$REPO" status --porcelain 2>/dev/null; } | shasum | cut -d' ' -f1)
-empty=$(printf '' | shasum | cut -d' ' -f1)
+h=$( { git -C "$REPO" diff HEAD 2>/dev/null; git -C "$REPO" status --porcelain 2>/dev/null; } | _sha1 | cut -d' ' -f1)
+empty=$(printf '' | _sha1 | cut -d' ' -f1)
 [ -n "$h" ] && [ "$h" != "$empty" ] || exit 0      # 변경 없으면 skip
 
 mark="${HERDR_PLUGIN_STATE_DIR:-/tmp}/pcr-last-reviewed"
 [ "$(cat "$mark" 2>/dev/null)" = "$h" ] && exit 0   # 같은 diff면 재발화 안 함
-printf '%s' "$h" > "$mark"
 
-"$HB" plugin action invoke plan-code-review.review
+# 지문은 핸드오프 성공 후에 기록 — 실패하면 다음 idle에서 같은 diff로 재시도된다.
+"$HB" plugin action invoke plan-code-review.review && printf '%s' "$h" > "$mark"

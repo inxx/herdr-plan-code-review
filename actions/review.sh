@@ -6,7 +6,7 @@ set -u
 ROOT="${HERDR_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 . "$ROOT/actions/lib.sh"
 
-ensure_reviewers "$(resolve_repo)"
+ensure_reviewers "$(resolve_repo)" || exit 1
 
 # 방금 생성된 경우 TUI가 입력받을 준비(idle)가 될 때까지 잠깐 대기 — best effort.
 "$HB" agent wait rev-cc --status idle --timeout 20000 >/dev/null 2>&1 || true

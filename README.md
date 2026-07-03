@@ -20,6 +20,13 @@ classes of issues — coverage, not redundancy. Running them in separate panes
 also keeps their contexts independent, which avoids the self-review bias of
 asking the coding session to review its own work.
 
+## Requirements
+
+- herdr ≥ 0.7.0
+- `jq` — the actions parse herdr's JSON output with it
+- `claude` and `codex` on `PATH` — the panes launch these
+- `git` — only for the opt-in auto-handoff diff fingerprint
+
 ## Install
 
 ```bash
