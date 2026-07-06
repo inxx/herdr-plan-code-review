@@ -26,6 +26,8 @@ asking the coding session to review its own work.
 - `jq` — the actions parse herdr's JSON output with it
 - `claude` and `codex` on `PATH` — the panes launch these
 - `git` — only for the opt-in auto-handoff diff fingerprint
+- for `setup-subagent-panes` only: a Claude Code version that emits the
+  `SubagentStart` / `SubagentStop` hook events
 
 ## Install
 
@@ -59,6 +61,41 @@ herdr plugin link ./herdr-plan-code-review
     count via `PCR_COLLECT_LINES`, default 400.
   - `done` looks like the state to wait on, but herdr rejects it for CLI waits
     ("done is a UI attention state; use idle") — so `collect` waits on `idle`.
+- **`setup-subagent-panes`** — one-time install of the Claude Code hooks that
+  power the subagent viewer panes (next section). Idempotent; re-run it after
+  plugin updates to refresh the installed scripts.
+  - CLI: `herdr plugin action invoke plan-code-review.setup-subagent-panes`
+
+## Subagent viewer panes
+
+`claude` runs its subagents (Task/Agent tool — explorers, executors,
+reviewers) *inside* the main process, so herdr can't see them as panes. The
+`setup-subagent-panes` action installs two Claude Code hooks that fix that:
+
+- **SubagentStart** → opens a viewer pane below the claude pane (same tab, no
+  focus steal) that tails the subagent's transcript — its text and tool calls
+  stream live.
+- **SubagentStop** → closes that pane again.
+
+What the action does:
+
+1. copies `claude-hooks/herdr-subagent-pane.sh` and
+   `claude-hooks/herdr-subagent-view.sh` to `~/.claude/hooks/`
+2. registers both hooks in `~/.claude/settings.json` — a `.bak-*` backup is
+   written before any change, and existing entries are left untouched
+
+Notes:
+
+- Outside a herdr pane (Claude Code Desktop, a plain terminal) the hook is a
+  no-op — it keys off the `HERDR_ENV` / `HERDR_PANE_ID` env vars herdr injects
+  into its panes, so it's safe to have installed everywhere.
+- Hooks are loaded at session start: they apply to **new** `claude` sessions,
+  not ones already running.
+- Only want some agents as panes? Narrow the `matcher` in settings.json (e.g.
+  `executor|reviewer`). Want panes to stay open after the agent finishes?
+  Remove the `SubagentStop` entry. Re-running the action restores defaults.
+- Uninstall: delete the `SubagentStart` / `SubagentStop` entries from
+  `~/.claude/settings.json` and remove the two scripts from `~/.claude/hooks/`.
 
 ## Workflow
 
