@@ -20,6 +20,9 @@ classes of issues — coverage, not redundancy. Running them in separate panes
 also keeps their contexts independent, which avoids the self-review bias of
 asking the coding session to review its own work.
 
+A separate, optional feature — [subagent viewer panes](#subagent-viewer-panes)
+— surfaces the subagents `claude` spawns as their own live panes.
+
 ## Requirements
 
 - herdr ≥ 0.7.0
@@ -140,7 +143,8 @@ Repo resolution order: `HERDR_REPO` → the `coder` pane's cwd → context JSON 
 
 Pane placement, models, the review prompt, and plan mode all live in
 `actions/lib.sh` and `actions/*.sh`. The auto-handoff gate is in
-`events/on-status.sh`.
+`events/on-status.sh`. The subagent viewer panes are in `claude-hooks/` (what
+gets installed) and `actions/setup-subagent-panes.sh` (the installer).
 
 > The screenshot is a real herdr capture; project names and paths have been
 > replaced with mock data.
